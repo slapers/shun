@@ -104,9 +104,19 @@ defmodule Shun.Verifier do
   end
 
   defp verify_ips(provider, addresses, options) do
-    case Enum.uniq(Enum.map(addresses, &verify_ip(provider, &1, options))) do
-      [:accept] -> {:ok, addresses}
-      _ -> {:error, :rejected}
+    result =
+      addresses
+      |> Enum.uniq()
+      |> Enum.reduce_while({:ok, []}, fn address, {:ok, address_acc}  ->
+        case verify_ip(provider, address, options) do
+          {:ok, address} -> {:cont, {:ok, [address | address_acc]}}
+          _ -> {:halt, {:error, :rejected}}
+        end
+      end)
+
+    case result do
+      {:ok, []} -> {:error, :rejected}
+      _ -> result
     end
   end
 

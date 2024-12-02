@@ -34,5 +34,11 @@ defmodule Shun.Preset.AWS.InstanceMetadataTest do
     test "rejects resolved #{name} when used via Shun" do
       assert {:error, _} = Shun.verify(AddressVerifier, unquote(name))
     end
+
+  end
+
+  test "accepts non-aws metadata addresses" do
+    assert {:ok, _} = Shun.verify(AddressVerifier, "http://10.0.0.1")
+    assert {:ok, _} = Shun.verify(AddressVerifier, "http://www.google.com")
   end
 end
